@@ -7,14 +7,15 @@
   <style>
     /* RESET Y PALETA CLARA / CREMA MINIMALISTA */
     :root {
-      --bg-body: #fbf9f5;         /* Crema suave de fondo */
-      --bg-sidebar: #f4efe6;      /* Marfil cálido para sidebar */
-      --bg-card: #ffffff;         /* Blanco puro para tarjetas */
-      --border-color: #e6dfd5;    /* Borde suave neutro */
-      --accent-red: #bc002d;      /* Rojo Sol Naciente para acentos */
-      --text-main: #2c2825;       /* Sombra oscura cálida para texto principal */
-      --text-muted: #78716c;      /* Texto secundario suave */
-      --hover-bg: #eae3d7;        /* Tono de hover sutil */
+      --bg-body: #fbf9f5;
+      --bg-sidebar: #f4efe6;
+      --bg-card: #ffffff;
+      --border-color: #e6dfd5;
+      --accent-red: #bc002d;
+      --text-main: #2c2825;
+      --text-muted: #78716c;
+      --hover-bg: #eae3d7;
+      --success-green: #15803d;
       --sidebar-width: 250px;
       --sidebar-collapsed-width: 68px;
       --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -118,10 +119,21 @@
     }
 
     .nav-icon {
-      font-size: 1.2rem;
       min-width: 28px;
       display: flex;
+      align-items: center;
       justify-content: center;
+    }
+
+    .nav-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--text-muted);
+      transition: stroke 0.2s ease;
+    }
+
+    .nav-link:hover .nav-icon svg {
+      stroke: var(--accent-red);
     }
 
     .nav-text {
@@ -231,20 +243,99 @@
       background-color: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: 10px;
-      padding: 40px;
+      padding: 30px;
       min-height: 320px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-muted);
-      font-size: 0.92rem;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    }
+
+    /* ESTILOS DE FORMULARIOS Y TABLAS DE MÓDULOS */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-group input, .form-group select {
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--accent-red);
+    }
+
+    .btn-primary {
+      background-color: var(--accent-red);
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+      align-self: flex-end;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 0.875rem;
+    }
+
+    .data-table th, .data-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .data-table th {
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+    }
+
+    .alert-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background-color: #fef2f2;
+      color: var(--accent-red);
+      border: 1px solid #fecaca;
     }
   </style>
 </head>
 <body>
 
-  <!-- BARRA LATERAL MINIMALISTA CREMA -->
+  <!-- BARRA LATERAL MINIMALISTA CON ÍCONOS SVG VECTORIALES -->
   <aside class="sidebar">
     <div class="sidebar-header">
       <img src="https://i.postimg.cc/PrDjQXJq/Logotipo-Seisho-Sushi-con-Sol-Japones.png" alt="Seicho Sushi" class="brand-logo">
@@ -254,51 +345,64 @@
     <ul class="nav-list">
       <!-- MÓDULO VENTAS -->
       <li class="nav-item">
-        <div class="nav-link">
-          <span class="nav-icon">📊</span>
+        <div class="nav-link" onclick="navigate('Ventas - Registro Diario')">
+          <span class="nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a.5.5 0 00.71 0L21.75 6M21.75 6v5.25m0-5.25h-5.25" />
+            </svg>
+          </span>
           <span class="nav-text">Ventas</span>
         </div>
         <ul class="submenu">
           <li class="submenu-item"><a href="#" onclick="navigate('Ventas - Registro Diario')">Registro Diario</a></li>
-          <li class="submenu-item"><a href="#" onclick="navigate('Ventas - Facturación')">Facturación</a></li>
           <li class="submenu-item"><a href="#" onclick="navigate('Ventas - Histórico')">Histórico de Ventas</a></li>
         </ul>
       </li>
 
       <!-- MÓDULO GASTOS Y STOCK -->
       <li class="nav-item">
-        <div class="nav-link">
-          <span class="nav-icon">📦</span>
+        <div class="nav-link" onclick="navigate('Gastos - Control de Stock')">
+          <span class="nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+            </svg>
+          </span>
           <span class="nav-text">Insumos y Gastos</span>
         </div>
         <ul class="submenu">
           <li class="submenu-item"><a href="#" onclick="navigate('Gastos - Control de Stock')">Control de Stock</a></li>
-          <li class="submenu-item"><a href="#" onclick="navigate('Gastos - Compras e Insumos')">Registro de Compras</a></li>
-          <li class="submenu-item"><a href="#" onclick="navigate('Gastos - Proveedores')">Proveedores</a></li>
+          <li class="submenu-item"><a href="#" onclick="navigate('Gastos - Registro de Compras')">Registro de Gastos</a></li>
         </ul>
       </li>
 
-      <!-- MÓDULO ESCANDALLOS -->
+      <!-- MÓDULO ESCANDALLOS Y COSTOS -->
       <li class="nav-item">
-        <div class="nav-link">
-          <span class="nav-icon">⚖️️</span>
+        <div class="nav-link" onclick="navigate('Costos - Escandallos de Rolls')">
+          <span class="nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.5H5.25A2.25 2.25 0 003 6.75v10.5a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 17.25V6.75A2.25 2.25 0 0018.75 4.5z" />
+            </svg>
+          </span>
           <span class="nav-text">Costos</span>
         </div>
         <ul class="submenu">
           <li class="submenu-item"><a href="#" onclick="navigate('Costos - Escandallos de Rolls')">Escandallos de Rolls</a></li>
-          <li class="submenu-item"><a href="#" onclick="navigate('Costos - Margen por Producto')">Margen por Producto</a></li>
         </ul>
       </li>
 
       <!-- MÓDULO REPORTES -->
       <li class="nav-item">
-        <div class="nav-link">
-          <span class="nav-icon">📈</span>
+        <div class="nav-link" onclick="navigate('Reportes - Balance General')">
+          <span class="nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
+            </svg>
+          </span>
           <span class="nav-text">Reportes</span>
         </div>
         <ul class="submenu">
           <li class="submenu-item"><a href="#" onclick="navigate('Reportes - Balance General')">Balance General</a></li>
-          <li class="submenu-item"><a href="#" onclick="navigate('Reportes - Proyección Económica')">Proyecciones</a></li>
         </ul>
       </li>
     </ul>
@@ -306,39 +410,297 @@
 
   <!-- WORKSPACE PRINCIPAL -->
   <div class="main-wrapper">
-    <h2 class="page-title" id="activeSectionTitle">Resumen General</h2>
+    <h2 class="page-title" id="activeSectionTitle">Ventas - Registro Diario</h2>
 
-    <!-- MÉTRICAS DE CABECERA -->
+    <!-- MÉTRICAS EN TIEMPO REAL -->
     <div class="metrics-grid">
       <div class="metric-card">
         <div class="metric-label">Ventas Hoy</div>
-        <div class="metric-value">$0</div>
+        <div class="metric-value" id="metricSales">$0.00</div>
       </div>
       <div class="metric-card">
-        <div class="metric-label">Gastos Mes</div>
-        <div class="metric-value">$0</div>
+        <div class="metric-label">Gastos Acumulados</div>
+        <div class="metric-value" id="metricExpenses">$0.00</div>
       </div>
       <div class="metric-card">
-        <div class="metric-label">Margen Bruto</div>
-        <div class="metric-value">0%</div>
+        <div class="metric-label">Margen Bruto Estimado</div>
+        <div class="metric-value" id="metricMargin">0.0%</div>
       </div>
     </div>
 
     <!-- VISTA DINÁMICA DE MÓDULO -->
     <div class="content-area" id="contentView">
-      Selecciona una opción del menú lateral para comenzar a trabajar.
+      <!-- Carga dinámica mediante JS sin refrescar la página -->
     </div>
   </div>
 
   <script>
     /**
-     * Actualiza la vista principal al hacer clic en una subopción del menú
-     * @param {string} sectionName - Nombre de la subsección seleccionada
+     * ESTADO GLOBAL Y PERSISTENCIA (LOCALSTORAGE + CACHE DE ALTA VELOCIDAD)
+     */
+    const AppState = {
+      sales: JSON.parse(localStorage.getItem('seicho_sales')) || [],
+      expenses: JSON.parse(localStorage.getItem('seicho_expenses')) || [],
+      stock: JSON.parse(localStorage.getItem('seicho_stock')) || [
+        { id: 1, item: 'Salmón Fresco (kg)', quantity: 4.5, min: 10.0 },
+        { id: 2, item: 'Arroz Koshihikari (kg)', quantity: 25.0, min: 15.0 },
+        { id: 3, item: 'Alga Nori (paquete)', quantity: 8.0, min: 5.0 }
+      ],
+      recipes: [
+        { name: 'Philadelphia Roll', salmonGrams: 120, riceGrams: 140, noriSheets: 1 },
+        { name: 'California Roll', salmonGrams: 0, riceGrams: 140, noriSheets: 1 }
+      ]
+    };
+
+    /**
+     * Guarda el estado en localStorage de forma ultrarrápida
+     */
+    function saveState() {
+      localStorage.setItem('seicho_sales', JSON.stringify(AppState.sales));
+      localStorage.setItem('seicho_expenses', JSON.stringify(AppState.expenses));
+      localStorage.setItem('seicho_stock', JSON.stringify(AppState.stock));
+      updateMetrics();
+    }
+
+    /**
+     * Recalcula métricas principales al instante
+     */
+    function updateMetrics() {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const todaySales = AppState.sales
+        .filter(s => s.date === todayStr)
+        .reduce((sum, s) => sum + Number(s.amount), 0);
+
+      const totalExpenses = AppState.expenses
+        .reduce((sum, e) => sum + Number(e.amount), 0);
+
+      const totalSalesAllTime = AppState.sales
+        .reduce((sum, s) => sum + Number(s.amount), 0);
+
+      const margin = totalSalesAllTime > 0 
+        ? (((totalSalesAllTime - totalExpenses) / totalSalesAllTime) * 100).toFixed(1) 
+        : '0.0';
+
+      document.getElementById('metricSales').innerText = `$${todaySales.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
+      document.getElementById('metricExpenses').innerText = `$${totalExpenses.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
+      document.getElementById('metricMargin').innerText = `${margin}%`;
+    }
+
+    /**
+     * RENDERIZADOR DE MÓDULOS
+     * @param {string} sectionName - Nombre del módulo a cargar
      */
     function navigate(sectionName) {
       document.getElementById('activeSectionTitle').innerText = sectionName;
-      document.getElementById('contentView').innerHTML = `<p>Cargando interfaz de <strong>${sectionName}</strong>...</p>`;
+      const view = document.getElementById('contentView');
+
+      if (sectionName.includes('Ventas')) {
+        renderSalesModule(view);
+      } else if (sectionName.includes('Stock') || sectionName.includes('Gastos')) {
+        renderExpensesModule(view);
+      } else if (sectionName.includes('Costos')) {
+        renderCostsModule(view);
+      } else if (sectionName.includes('Reportes')) {
+        renderReportsModule(view);
+      }
     }
+
+    /* MÓDULO 1: REGISTRO DE VENTAS */
+    function renderSalesModule(container) {
+      container.innerHTML = `
+        <form id="salesForm" onsubmit="handleSalesSubmit(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Canal de Venta</label>
+              <select id="saleChannel" required>
+                <option value="Take-Away">Take-Away</option>
+                <option value="Delivery Propio">Delivery Propio</option>
+                <option value="Rappi / PedirYa">Plataformas App</option>
+                <option value="Salón">Consumo Salón</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Medio de Pago</label>
+              <select id="salePayment">
+                <option value="Efectivo">Efectivo</option>
+                <option value="Transferencia">Transferencia</option>
+                <option value="Tarjeta">Tarjeta</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Monto Total ($)</label>
+              <input type="number" id="saleAmount" step="0.01" min="0" placeholder="0.00" required>
+            </div>
+            <button type="submit" class="btn-primary">Registrar Venta</button>
+          </div>
+        </form>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Fecha / Hora</th>
+              <th>Canal</th>
+              <th>Medio de Pago</th>
+              <th>Monto</th>
+            </tr>
+          </thead>
+          <tbody id="salesTableBody">
+            ${AppState.sales.slice(-5).reverse().map(s => `
+              <tr>
+                <td>${s.timestamp}</td>
+                <td>${s.channel}</td>
+                <td>${s.payment}</td>                 <td><strong>$${Number(s.amount).toFixed(2)}</strong></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function handleSalesSubmit(e) {
+      e.preventDefault();
+      const now = new Date();
+      const newSale = {
+        date: now.toISOString().split('T')[0],
+        timestamp: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        channel: document.getElementById('saleChannel').value,
+        payment: document.getElementById('salePayment').value,
+        amount: parseFloat(document.getElementById('saleAmount').value)
+      };
+
+      AppState.sales.push(newSale);
+      saveState();
+      navigate('Ventas - Registro Diario');
+    }
+
+    /* MÓDULO 2: GASTOS Y STOCK CON ALERTAS DE REORDEN */
+    function renderExpensesModule(container) {
+      container.innerHTML = `
+        <form id="expenseForm" onsubmit="handleExpenseSubmit(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Descripción del Insumo / Gasto</label>
+              <input type="text" id="expenseDesc" placeholder="Ej. Compra de Salmón" required>
+            </div>
+            <div class="form-group">
+              <label>Tipo de Costo</label>
+              <select id="expenseType">
+                <option value="Costo Directo (Insumo)">Costo Directo (Insumo)</option>
+                <option value="Gasto Fijo">Gasto Fijo (Alquiler, Servicios)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Monto ($)</label>
+              <input type="number" id="expenseAmount" step="0.01" min="0" placeholder="0.00" required>
+            </div>
+            <button type="submit" class="btn-primary">Registrar Gasto</button>
+          </div>
+        </form>
+
+        <h3 style="margin-top: 24px; font-size: 1rem; color: var(--text-main);">Estado del Stock de Insumos Críticos</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Insumo</th>
+              <th>Cantidad Actual</th>
+              <th>Mínimo Requerido</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${AppState.stock.map(item => `
+              <tr>
+                <td>${item.item}</td>
+                <td><strong>${item.quantity}</strong></td>
+                <td>${item.min}</td>
+                <td>
+                  ${item.quantity <= item.min 
+                    ? `<span class="alert-badge">Reorden Crítico</span>` 
+                    : `<span style="color: var(--success-green); font-weight:600;">Óptimo</span>`}
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function handleExpenseSubmit(e) {
+      e.preventDefault();
+      const now = new Date();
+      const newExpense = {
+        date: now.toISOString().split('T')[0],
+        description: document.getElementById('expenseDesc').value,
+        type: document.getElementById('expenseType').value,
+        amount: parseFloat(document.getElementById('expenseAmount').value)
+      };
+
+      AppState.expenses.push(newExpense);
+      saveState();
+      navigate('Gastos - Control de Stock');
+    }
+
+    /* MÓDULO 3: ESCANDALLOS Y COSTO POR ROLL */
+    function renderCostsModule(container) {
+      container.innerHTML = `
+        <p style="margin-bottom: 16px; color: var(--text-muted);">Cálculo automático de costo de fabricación por pieza basado en receta e insumos.</p>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nombre del Roll</th>
+              <th>Insumos Principales</th>
+              <th>Costo Est. Fabricación</th>
+              <th>PVP Sugerido (60% Margen)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${AppState.recipes.map(r => {
+              const estimatedCost = (r.salmonGrams * 0.03) + (r.riceGrams * 0.005) + (r.noriSheets * 0.15);
+              const suggestedPVP = estimatedCost / 0.4;
+              return `
+                <tr>
+                  <td><strong>${r.name}</strong></td>
+                  <td>${r.salmonGrams}g Salmón, ${r.riceGrams}g Arroz,${r.noriSheets} Nori</td>
+                  <td>$${estimatedCost.toFixed(2)}</td>                   <td><strong style="color: var(--accent-red);">$${suggestedPVP.toFixed(2)}</strong></td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    /* MÓDULO 4: REPORTES Y BALANCE GENERAL */
+    function renderReportsModule(container) {
+      const totalSales = AppState.sales.reduce((sum, s) => sum + Number(s.amount), 0);
+      const totalExpenses = AppState.expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+      const netProfit = totalSales - totalExpenses;
+
+      container.innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+          <div style="padding: 16px; background: var(--bg-body); border-radius: 8px;">
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Ingresos Totales</div>
+            <div style="font-size: 1.4rem; font-weight: 700;">$${totalSales.toFixed(2)}</div>
+          </div>
+          <div style="padding: 16px; background: var(--bg-body); border-radius: 8px;">
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Egresos / Gastos Totales</div>
+            <div style="font-size: 1.4rem; font-weight: 700;">$${totalExpenses.toFixed(2)}</div>
+          </div>
+          <div style="padding: 16px; background: var(--bg-body); border-radius: 8px;">
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Resultado Neto Est.</div>
+            <div style="font-size: 1.4rem; font-weight: 700; color: ${netProfit >= 0 ? 'var(--success-green)' : 'var(--accent-red)'};">
+              $${netProfit.toFixed(2)}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    /* INICIALIZACIÓN AL CARGAR LA PÁGINA */
+    document.addEventListener('DOMContentLoaded', () => {
+      updateMetrics();
+      navigate('Ventas - Registro Diario');
+    });
   </script>
 </body>
 </html>
