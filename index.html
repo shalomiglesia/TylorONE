@@ -1,1 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seicho Sushi - Gestión Financiera</title>
+  <style>
+    /* VARIABLES Y TEMA GENERAL */
+    :root {
+      --bg-color: #0f1117;
+      --card-bg: #1a1d26;
+      --card-border: #2a2e3d;
+      --primary: #bc002d; /* Rojo Sol Naciente */
+      --primary-hover: #9e0026;
+      --text-main: #f0f2f5;
+      --text-muted: #9ba3af;
+      --accent: #22c55e;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ENCABEZADO / NAVBAR */
+    header {
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--card-border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .brand img {
+      height: 48px;
+      width: auto;
+      border-radius: 50%;
+    }
+
+    .brand h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent);
+      border-radius: 50%;
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    /* SECCIÓN HERO DE BIENVENIDA */
+    .hero {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .hero h2 {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-main);
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 1.5rem auto;
+      line-height: 1.5;
+    }
+
+    /* GRILLA DE TARJETAS DE RESUMEN (MOCKUP INICIAL) */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+
+    .card-title {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* SECCIÓN DE MÓDULOS DE NAVEGACIÓN */
+    .modules-section {
+      margin-top: 2.5rem;
+    }
+
+    .modules-section h3 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      color: var(--text-main);
+    }
+
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .module-btn {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 1.25rem;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: left;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .module-btn:hover {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .module-btn span {
+      font-size: 0.825rem;
+      color: var(--text-muted);
+    }
+
+    .module-btn:hover span {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* PIE DE PÁGINA */
+    footer {
+      background-color: var(--card-bg);
+      border-top: 1px solid var(--card-border);
+      padding: 1rem 2rem;
+      text-align: center;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ENCABEZADO -->
+  <header>
+    <div class="brand">
+      <img src="https://i.postimg.cc/PrDjQXJq/Logotipo-Seisho-Sushi-con-Sol-Japones.png" alt="Logo Seicho Sushi">
+      <h1>Seicho Sushi</h1>
+    </div>
+    <div class="nav-status">
+      <div class="status-dot"></div>
+      <span>Sistema Operativo</span>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main>
+    <!-- HERO DE BIENVENIDA -->
+    <section class="hero">
+      <h2>Panel de Control Financiero</h2>
+      <p>Bienvenido al sistema de gestión de finanzas y desarrollo económico de Seicho Sushi.</p>
+    </section>
+
+    <!-- INDICADORES CLAVE (MOCKUP INICIAL) -->
+    <section class="dashboard-grid">
+      <div class="card">
+        <div class="card-title">Ventas del Día</div>
+        <div class="card-value" id="dailySales">$0</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Gastos del Mes</div>
+        <div class="card-value" id="monthlyExpenses">$0</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Margen Neto Est.</div>
+        <div class="card-value" id="netMargin">0%</div>
+      </div>
+    </section>
+
+    <!-- MÓDULOS DEL SISTEMA -->
+    <section class="modules-section">
+      <h3>Acceso a Módulos</h3>
+      <div class="modules-grid">
+        <button class="module-btn" onclick="handleModuleClick('Ingresos y Ventas')">
+          📊 Ventas
+          <span>Registro diario y facturación</span>
+        </button>
+        <button class="module-btn" onclick="handleModuleClick('Gastos e Insumos')">
+          📦 Gastos y Stock
+          <span>Control de insumos y proveedores</span>
+        </button>
+        <button class="module-btn" onclick="handleModuleClick('Costos y Margen')">
+          ⚖️ Escandallos
+          <span>Costeo de rolls y productos</span>
+        </button>
+        <button class="module-btn" onclick="handleModuleClick('Reportes')">
+          📈 Reportes
+          <span>Balance y proyecciones</span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- PIE DE PÁGINA -->
+  <footer>
+    <p>&copy; 2026 Seicho Sushi - Sistema de Gestión Interna</p>
+  </footer>
+
+  <!-- LÓGICA JAVASCRIPT -->
+  <script>
+    /**
+     * Maneja el clic en los botones de módulos
+     * @param {string} moduleName - Nombre del módulo seleccionado
+     */
+    function handleModuleClick(moduleName) {
+      console.log(`Navegando a módulo: ${moduleName}`);
+      alert(`Módulo de ${moduleName} en construcción para la siguiente fase.`);
+    }
+
+    /**
+     * Inicialización de la pantalla principal
+     */
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('Interfaz de Seicho Sushi cargada correctamente.');
+    });
+  </script>
+</body>
+</html>
