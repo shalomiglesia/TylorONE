@@ -5,17 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Seicho Sushi - Gestión Financiera</title>
   <style>
-    /* VARIABLES Y TEMA GENERAL */
+    /* RESET Y VARIABLES MINIMALISTAS */
     :root {
-      --bg-color: #0f1117;
-      --card-bg: #1a1d26;
-      --card-border: #2a2e3d;
-      --primary: #bc002d; /* Rojo Sol Naciente */
-      --primary-hover: #9e0026;
-      --text-main: #f0f2f5;
-      --text-muted: #9ba3af;
-      --accent: #22c55e;
-      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --bg-body: #0d0e12;
+      --bg-sidebar: #13151c;
+      --bg-card: #181a24;
+      --border-color: rgba(255, 255, 255, 0.07);
+      --accent-red: #bc002d;
+      --text-main: #e2e8f0;
+      --text-muted: #8a94a6;
+      --sidebar-width: 250px;
+      --sidebar-collapsed-width: 68px;
+      --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
     }
 
     * {
@@ -25,266 +26,304 @@
     }
 
     body {
-      background-color: var(--bg-color);
+      background-color: var(--bg-body);
       color: var(--text-main);
       font-family: var(--font-family);
       min-height: 100vh;
       display: flex;
+      overflow-x: hidden;
+    }
+
+    /* BARRA LATERAL (SIDEBAR) */
+    aside.sidebar {
+      width: var(--sidebar-collapsed-width);
+      height: 100vh;
+      background-color: var(--bg-sidebar);
+      border-right: 1px solid var(--border-color);
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 100;
+      transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
       flex-direction: column;
     }
 
-    /* ENCABEZADO / NAVBAR */
-    header {
-      background-color: var(--card-bg);
-      border-bottom: 1px solid var(--card-border);
-      padding: 1rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    aside.sidebar:hover {
+      width: var(--sidebar-width);
     }
 
-    .brand {
+    /* HEADER DE SIDEBAR / LOGO */
+    .sidebar-header {
+      height: 70px;
       display: flex;
       align-items: center;
-      gap: 1rem;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--border-color);
+      overflow: hidden;
+      white-space: nowrap;
     }
 
-    .brand img {
-      height: 48px;
-      width: auto;
+    .brand-logo {
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
+      min-width: 36px;
+      object-fit: cover;
     }
 
-    .brand h1 {
-      font-size: 1.25rem;
+    .brand-title {
+      font-size: 1rem;
       font-weight: 600;
+      margin-left: 16px;
       letter-spacing: 0.5px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
     }
 
-    .nav-status {
+    aside.sidebar:hover .brand-title {
+      opacity: 1;
+    }
+
+    /* NAVEGACIÓN Y LISTA DESPLEGABLE CON HOVER */
+    .nav-list {
+      list-style: none;
+      padding: 12px 0;
+      flex: 1;
+    }
+
+    .nav-item {
+      position: relative;
+    }
+
+    .nav-link {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 0.875rem;
+      height: 50px;
+      padding: 0 20px;
       color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease, background 0.2s ease;
+      white-space: nowrap;
+      cursor: pointer;
     }
 
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      background-color: var(--accent);
-      border-radius: 50%;
+    .nav-link:hover {
+      color: var(--text-main);
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .nav-icon {
+      font-size: 1.2rem;
+      min-width: 28px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .nav-text {
+      font-size: 0.9rem;
+      margin-left: 16px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    aside.sidebar:hover .nav-text {
+      opacity: 1;
+    }
+
+    /* SUBMENÚ DESPLEGABLE (HOVER) */
+    .submenu {
+      position: absolute;
+      top: 0;
+      left: 100%;
+      width: 220px;
+      background-color: var(--bg-sidebar);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      list-style: none;
+      padding: 8px 0;
+      display: none;
+      z-index: 101;
+    }
+
+    .nav-item:hover .submenu {
+      display: block;
+    }
+
+    .submenu-item a {
+      display: block;
+      padding: 10px 20px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .submenu-item a:hover {
+      color: var(--text-main);
+      background-color: rgba(188, 0, 45, 0.15);
+      border-left: 3px solid var(--accent-red);
+      padding-left: 17px;
     }
 
     /* CONTENEDOR PRINCIPAL */
-    main {
+    .main-wrapper {
+      margin-left: var(--sidebar-collapsed-width);
       flex: 1;
-      max-width: 1200px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 2rem 1rem;
+      padding: 40px;
+      transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* SECCIÓN HERO DE BIENVENIDA */
-    .hero {
-      background-color: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 2.5rem;
-      margin-bottom: 2rem;
-      text-align: center;
-    }
-
-    .hero h2 {
-      font-size: 2rem;
-      margin-bottom: 0.75rem;
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 500;
+      letter-spacing: -0.5px;
+      margin-bottom: 24px;
       color: var(--text-main);
     }
 
-    .hero p {
-      color: var(--text-muted);
-      max-width: 600px;
-      margin: 0 auto 1.5rem auto;
-      line-height: 1.5;
-    }
-
-    /* GRILLA DE TARJETAS DE RESUMEN (MOCKUP INICIAL) */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 1.5rem;
-      transition: transform 0.2s ease, border-color 0.2s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      border-color: var(--primary);
-    }
-
-    .card-title {
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 0.5rem;
-    }
-
-    .card-value {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
-    /* SECCIÓN DE MÓDULOS DE NAVEGACIÓN */
-    .modules-section {
-      margin-top: 2.5rem;
-    }
-
-    .modules-section h3 {
-      font-size: 1.25rem;
-      margin-bottom: 1rem;
-      color: var(--text-main);
-    }
-
-    .modules-grid {
+    /* GRILLA DE DASHBOARD MINIMALISTA */
+    .metrics-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem;
+      gap: 20px;
+      margin-bottom: 40px;
     }
 
-    .module-btn {
-      background-color: var(--card-bg);
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
-      padding: 1.25rem;
+    .metric-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
       border-radius: 8px;
-      cursor: pointer;
-      text-align: left;
-      font-size: 1rem;
-      font-weight: 500;
-      transition: all 0.2s ease;
+      padding: 20px;
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    /* ÁREA DE CONTENIDO DINÁMICO */
+    .content-area {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 30px;
+      min-height: 300px;
       display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .module-btn:hover {
-      background-color: var(--primary);
-      border-color: var(--primary);
-    }
-
-    .module-btn span {
-      font-size: 0.825rem;
+      align-items: center;
+      justify-content: center;
       color: var(--text-muted);
-    }
-
-    .module-btn:hover span {
-      color: rgba(255, 255, 255, 0.8);
-    }
-
-    /* PIE DE PÁGINA */
-    footer {
-      background-color: var(--card-bg);
-      border-top: 1px solid var(--card-border);
-      padding: 1rem 2rem;
-      text-align: center;
-      font-size: 0.875rem;
-      color: var(--text-muted);
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
 
-  <!-- ENCABEZADO -->
-  <header>
-    <div class="brand">
-      <img src="https://i.postimg.cc/PrDjQXJq/Logotipo-Seisho-Sushi-con-Sol-Japones.png" alt="Logo Seicho Sushi">
-      <h1>Seicho Sushi</h1>
+  <!-- BARRA LATERAL MINIMALISTA -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <img src="https://i.postimg.cc/PrDjQXJq/Logotipo-Seisho-Sushi-con-Sol-Japones.png" alt="Seicho Sushi" class="brand-logo">
+      <span class="brand-title">SEICHO SUSHI</span>
     </div>
-    <div class="nav-status">
-      <div class="status-dot"></div>
-      <span>Sistema Operativo</span>
+
+    <ul class="nav-list">
+      <!-- MÓDULO VENTAS -->
+      <li class="nav-item">
+        <div class="nav-link">
+          <span class="nav-icon">📊</span>
+          <span class="nav-text">Ventas</span>
+        </div>
+        <ul class="submenu">
+          <li class="submenu-item"><a href="#" onclick="navigate('Ventas - Registro Diario')">Registro Diario</a></li>
+          <li class="submenu-item"><a href="#" onclick="navigate('Ventas - Facturación')">Facturación</a></li>
+          <li class="submenu-item"><a href="#" onclick="navigate('Ventas - Histórico')">Histórico de Ventas</a></li>
+        </ul>
+      </li>
+
+      <!-- MÓDULO GASTOS Y STOCK -->
+      <li class="nav-item">
+        <div class="nav-link">
+          <span class="nav-icon">📦</span>
+          <span class="nav-text">Insumos y Gastos</span>
+        </div>
+        <ul class="submenu">
+          <li class="submenu-item"><a href="#" onclick="navigate('Gastos - Control de Stock')">Control de Stock</a></li>
+          <li class="submenu-item"><a href="#" onclick="navigate('Gastos - Compras e Insumos')">Registro de Compras</a></li>
+          <li class="submenu-item"><a href="#" onclick="navigate('Gastos - Proveedores')">Proveedores</a></li>
+        </ul>
+      </li>
+
+      <!-- MÓDULO ESCANDALLOS -->
+      <li class="nav-item">
+        <div class="nav-link">
+          <span class="nav-icon">⚖️</span>
+          <span class="nav-text">Costos</span>
+        </div>
+        <ul class="submenu">
+          <li class="submenu-item"><a href="#" onclick="navigate('Costos - Escandallos de Rolls')">Escandallos de Rolls</a></li>
+          <li class="submenu-item"><a href="#" onclick="navigate('Costos - Margen por Producto')">Margen por Producto</a></li>
+        </ul>
+      </li>
+
+      <!-- MÓDULO REPORTES -->
+      <li class="nav-item">
+        <div class="nav-link">
+          <span class="nav-icon">📈</span>
+          <span class="nav-text">Reportes</span>
+        </div>
+        <ul class="submenu">
+          <li class="submenu-item"><a href="#" onclick="navigate('Reportes - Balance General')">Balance General</a></li>
+          <li class="submenu-item"><a href="#" onclick="navigate('Reportes - Proyección Económica')">Proyecciones</a></li>
+        </ul>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- WORKSPACE PRINCIPAL -->
+  <div class="main-wrapper">
+    <h2 class="page-title" id="activeSectionTitle">Resumen General</h2>
+
+    <!-- METRICAS DE CABECERA -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Ventas Hoy</div>
+        <div class="metric-value">$0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Gastos Mes</div>
+        <div class="metric-value">$0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Margen Bruto</div>
+        <div class="metric-value">0%</div>
+      </div>
     </div>
-  </header>
 
-  <!-- CONTENIDO PRINCIPAL -->
-  <main>
-    <!-- HERO DE BIENVENIDA -->
-    <section class="hero">
-      <h2>Panel de Control Financiero</h2>
-      <p>Bienvenido al sistema de gestión de finanzas y desarrollo económico de Seicho Sushi.</p>
-    </section>
+    <!-- VISTA DINÁMICA DE MÓDULO -->
+    <div class="content-area" id="contentView">
+      Selecciona una opción del menú lateral para comenzar a trabajar.
+    </div>
+  </div>
 
-    <!-- INDICADORES CLAVE (MOCKUP INICIAL) -->
-    <section class="dashboard-grid">
-      <div class="card">
-        <div class="card-title">Ventas del Día</div>
-        <div class="card-value" id="dailySales">$0</div>
-      </div>
-      <div class="card">
-        <div class="card-title">Gastos del Mes</div>
-        <div class="card-value" id="monthlyExpenses">$0</div>
-      </div>
-      <div class="card">
-        <div class="card-title">Margen Neto Est.</div>
-        <div class="card-value" id="netMargin">0%</div>
-      </div>
-    </section>
-
-    <!-- MÓDULOS DEL SISTEMA -->
-    <section class="modules-section">
-      <h3>Acceso a Módulos</h3>
-      <div class="modules-grid">
-        <button class="module-btn" onclick="handleModuleClick('Ingresos y Ventas')">
-          📊 Ventas
-          <span>Registro diario y facturación</span>
-        </button>
-        <button class="module-btn" onclick="handleModuleClick('Gastos e Insumos')">
-          📦 Gastos y Stock
-          <span>Control de insumos y proveedores</span>
-        </button>
-        <button class="module-btn" onclick="handleModuleClick('Costos y Margen')">
-          ⚖️ Escandallos
-          <span>Costeo de rolls y productos</span>
-        </button>
-        <button class="module-btn" onclick="handleModuleClick('Reportes')">
-          📈 Reportes
-          <span>Balance y proyecciones</span>
-        </button>
-      </div>
-    </section>
-  </main>
-
-  <!-- PIE DE PÁGINA -->
-  <footer>
-    <p>&copy; 2026 Seicho Sushi - Sistema de Gestión Interna</p>
-  </footer>
-
-  <!-- LÓGICA JAVASCRIPT -->
   <script>
     /**
-     * Maneja el clic en los botones de módulos
-     * @param {string} moduleName - Nombre del módulo seleccionado
+     * Actualiza la vista principal al hacer clic en una subopción del menú
+     * @param {string} sectionName - Nombre de la subsección seleccionada
      */
-    function handleModuleClick(moduleName) {
-      console.log(`Navegando a módulo: ${moduleName}`);
-      alert(`Módulo de ${moduleName} en construcción para la siguiente fase.`);
+    function navigate(sectionName) {
+      document.getElementById('activeSectionTitle').innerText = sectionName;
+      document.getElementById('contentView').innerHTML = `<p>Cargando interfaz de <strong>${sectionName}</strong>...</p>`;
     }
-
-    /**
-     * Inicialización de la pantalla principal
-     */
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('Interfaz de Seicho Sushi cargada correctamente.');
-    });
   </script>
 </body>
 </html>
