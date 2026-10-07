@@ -505,7 +505,8 @@
         { name: 'Philadelphia Roll', salmonGrams: 120, riceGrams: 140, noriSheets: 1 },
         { name: 'California Roll', salmonGrams: 0, riceGrams: 140, noriSheets: 1 }
       ],
-      editingStockId: null
+      editingStockId: null,
+      editingExpenseId: null
     };
 
     /**
@@ -628,34 +629,39 @@
       navigate('Ventas - Registro Diario');
     }
 
-    /* MÓDULO DE STOCK Y GASTOS CON CRUD COMPLETO (EDITAR Y ELIMINAR) */
+    /* MÓDULO DE STOCK Y GASTOS CON CRUD COMPLETO EN AMBOS ENTORNO */
     function renderStockAndExpensesModule(container) {
-      const isEditing = AppState.editingStockId !== null;
-      const currentItem = isEditing 
+      const isEditingStock = AppState.editingStockId !== null;
+      const currentStockItem = isEditingStock 
         ? AppState.stock.find(item => item.id === AppState.editingStockId) 
+        : null;
+
+      const isEditingExpense = AppState.editingExpenseId !== null;
+      const currentExpenseItem = isEditingExpense 
+        ? AppState.expenses.find(item => item.id === AppState.editingExpenseId) 
         : null;
 
       container.innerHTML = `
         <h3 style="margin-bottom: 16px; font-size: 1rem; color: var(--text-main);">
-          ${isEditing ? 'Editar Insumo de Stock' : 'Agregar Nuevo Insumo al Stock'}
+          ${isEditingStock ? 'Editar Insumo de Stock' : 'Agregar Nuevo Insumo al Stock'}
         </h3>
         <form id="stockForm" onsubmit="handleStockSubmit(event)">
           <div class="form-grid">
             <div class="form-group">
               <label>Nombre del Insumo / Unidad</label>
-              <input type="text" id="stockName" value="${currentItem ? currentItem.item : ''}" placeholder="Ej. Langostinos (kg)" required>
+              <input type="text" id="stockName" value="${currentStockItem ? currentStockItem.item : ''}" placeholder="Ej. Langostinos (kg)" required>
             </div>
             <div class="form-group">
               <label>Cantidad Actual</label>
-              <input type="number" id="stockQty" step="0.1" min="0" value="${currentItem ? currentItem.quantity : ''}" placeholder="0.0" required>
+              <input type="number" id="stockQty" step="0.1" min="0" value="${currentStockItem ? currentStockItem.quantity : ''}" placeholder="0.0" required>
             </div>
             <div class="form-group">
               <label>Mínimo para Alerta</label>
-              <input type="number" id="stockMin" step="0.1" min="0" value="${currentItem ? currentItem.min : ''}" placeholder="0.0" required>
+              <input type="number" id="stockMin" step="0.1" min="0" value="${currentStockItem ? currentStockItem.min : ''}" placeholder="0.0" required>
             </div>
             <div style="display: flex; gap: 8px;">
-              <button type="submit" class="btn-primary">${isEditing ? 'Guardar Cambios' : 'Agregar Insumo'}</button>
-              ${isEditing ? `<button type="button" class="btn-secondary" onclick="cancelStockEdit()">Cancelar</button>` : ''}
+              <button type="submit" class="btn-primary">${isEditingStock ? 'Guardar Cambios' : 'Agregar Insumo'}</button>
+              ${isEditingStock ? `<button type="button" class="btn-secondary" onclick="cancelStockEdit()">Cancelar</button>` : ''}
             </div>
           </div>
         </form>
@@ -695,32 +701,65 @@
 
         <div class="section-divider"></div>
 
-        <h3 style="margin-bottom: 16px; font-size: 1rem; color: var(--text-main);">Registro de Compras y Gastos</h3>
+        <h3 style="margin-bottom: 16px; font-size: 1rem; color: var(--text-main);">
+          ${isEditingExpense ? 'Editar Registro de Gasto' : 'Registro de Compras y Gastos'}
+        </h3>
         <form id="expenseForm" onsubmit="handleExpenseSubmit(event)">
           <div class="form-grid">
             <div class="form-group">
               <label>Descripción del Gasto</label>
-              <input type="text" id="expenseDesc" placeholder="Ej. Pago de Alquiler" required>
+              <input type="text" id="expenseDesc" value="${currentExpenseItem ? currentExpenseItem.description : ''}" placeholder="Ej. Pago de Alquiler" required>
             </div>
             <div class="form-group">
               <label>Tipo de Costo</label>
               <select id="expenseType">
-                <option value="Costo Directo (Insumo)">Costo Directo (Insumo)</option>
-                <option value="Gasto Fijo">Gasto Fijo (Alquiler, Servicios)</option>
+                <option value="Costo Directo (Insumo)" ${currentExpenseItem && currentExpenseItem.type === 'Costo Directo (Insumo)' ? 'selected' : ''}>Costo Directo (Insumo)</option>
+                <option value="Gasto Fijo" ${currentExpenseItem && currentExpenseItem.type === 'Gasto Fijo' ? 'selected' : ''}>Gasto Fijo (Alquiler, Servicios)</option>
               </select>
             </div>
             <div class="form-group">
               <label>Monto ($)</label>
-              <input type="number" id="expenseAmount" step="0.01" min="0" placeholder="0.00" required>
+              <input type="number" id="expenseAmount" step="0.01" min="0" value="${currentExpenseItem ? currentExpenseItem.amount : ''}" placeholder="0.00" required>
             </div>
-            <button type="submit" class="btn-primary">Registrar Gasto</button>
+            <div style="display: flex; gap: 8px;">
+              <button type="submit" class="btn-primary">${isEditingExpense ? 'Guardar Cambios' : 'Registrar Gasto'}</button>
+              ${isEditingExpense ? `<button type="button" class="btn-secondary" onclick="cancelExpenseEdit()">Cancelar</button>` : ''}
+            </div>
           </div>
         </form>
+
+        <h4 style="margin-top: 24px; margin-bottom: 12px; font-size: 0.9rem; color: var(--text-muted);">Historial de Gastos Registrados</h4>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Descripción</th>
+              <th>Tipo</th>
+              <th>Monto</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${AppState.expenses.length === 0 
+              ? `<tr><td colspan="5" style="color: var(--text-muted);">No hay gastos registrados aún.</td></tr>`
+              : AppState.expenses.slice().reverse().map(e => `
+                <tr>
+                  <td>${e.date}</td>
+                  <td><strong>${e.description}</strong></td>
+                  <td>${e.type}</td>                   <td>$${Number(e.amount).toFixed(2)}</td>
+                  <td>
+                    <button class="btn-action btn-edit" onclick="editExpenseItem(${e.id})">Editar</button>
+                    <button class="btn-action btn-delete" onclick="deleteExpenseItem(${e.id})">Eliminar</button>
+                  </td>
+                </tr>
+              `).join('')}
+          </tbody>
+        </table>
       `;
     }
 
     /**
-     * AGREGAR O ACTUALIZAR INSUMO EN STOCK
+     * OPERACIONES CRUD DE STOCK
      */
     function handleStockSubmit(e) {
       e.preventDefault();
@@ -729,7 +768,6 @@
       const min = parseFloat(document.getElementById('stockMin').value);
 
       if (AppState.editingStockId !== null) {
-        // Modo Edición
         const item = AppState.stock.find(i => i.id === AppState.editingStockId);
         if (item) {
           item.item = name;
@@ -738,7 +776,6 @@
         }
         AppState.editingStockId = null;
       } else {
-        // Modo Creación
         const newItem = {
           id: Date.now(),
           item: name,
@@ -752,25 +789,16 @@
       navigate('Gastos - Control de Stock');
     }
 
-    /**
-     * PREPARAR FORMULARIO PARA EDITAR
-     */
     function editStockItem(id) {
       AppState.editingStockId = id;
       navigate('Gastos - Control de Stock');
     }
 
-    /**
-     * CANCELAR EDICIÓN
-     */
     function cancelStockEdit() {
       AppState.editingStockId = null;
       navigate('Gastos - Control de Stock');
     }
 
-    /**
-     * ELIMINAR INSUMO DE STOCK
-     */
     function deleteStockItem(id) {
       const item = AppState.stock.find(i => i.id === id);
       if (item && confirm(`¿Estás seguro de eliminar "${item.item}" del control de stock?`)) {
@@ -783,19 +811,61 @@
       }
     }
 
+    /**
+     * OPERACIONES CRUD DE GASTOS / COSTOS
+     */
     function handleExpenseSubmit(e) {
       e.preventDefault();
-      const now = new Date();
-      const newExpense = {
-        date: now.toISOString().split('T')[0],
-        description: document.getElementById('expenseDesc').value,
-        type: document.getElementById('expenseType').value,
-        amount: parseFloat(document.getElementById('expenseAmount').value)
-      };
+      const desc = document.getElementById('expenseDesc').value;
+      const type = document.getElementById('expenseType').value;
+      const amount = parseFloat(document.getElementById('expenseAmount').value);
 
-      AppState.expenses.push(newExpense);
+      if (AppState.editingExpenseId !== null) {
+        // Modo Edición
+        const expense = AppState.expenses.find(e => e.id === AppState.editingExpenseId);
+        if (expense) {
+          expense.description = desc;
+          expense.type = type;
+          expense.amount = amount;
+        }
+        AppState.editingExpenseId = null;
+      } else {
+        // Modo Creación
+        const now = new Date();
+        const newExpense = {
+          id: Date.now(),
+          date: now.toISOString().split('T')[0],
+          description: desc,
+          type: type,
+          amount: amount
+        };
+        AppState.expenses.push(newExpense);
+      }
+
       saveState();
       navigate('Gastos - Control de Stock');
+    }
+
+    function editExpenseItem(id) {
+      AppState.editingExpenseId = id;
+      navigate('Gastos - Control de Stock');
+    }
+
+    function cancelExpenseEdit() {
+      AppState.editingExpenseId = null;
+      navigate('Gastos - Control de Stock');
+    }
+
+    function deleteExpenseItem(id) {
+      const expense = AppState.expenses.find(e => e.id === id);
+      if (expense && confirm(`¿Estás seguro de eliminar el gasto "${expense.description}" de $${expense.amount.toFixed(2)}?`)) {
+        AppState.expenses = AppState.expenses.filter(e => e.id !== id);
+        if (AppState.editingExpenseId === id) {
+          AppState.editingExpenseId = null;
+        }
+        saveState();
+        navigate('Gastos - Control de Stock');
+      }
     }
 
     /* MÓDULO COSTOS */
