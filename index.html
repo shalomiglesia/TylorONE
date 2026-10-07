@@ -251,7 +251,7 @@
     /* ESTILOS DE FORMULARIOS Y TABLAS */
     .form-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 16px;
       margin-bottom: 20px;
     }
@@ -465,7 +465,7 @@
 
   <!-- WORKSPACE PRINCIPAL -->
   <div class="main-wrapper">
-    <h2 class="page-title" id="activeSectionTitle">Gastos - Control de Stock</h2>
+    <h2 class="page-title" id="activeSectionTitle">Costos - Escandallos de Rolls</h2>
 
     <!-- MÉTRICAS EN TIEMPO REAL -->
     <div class="metrics-grid">
@@ -485,7 +485,7 @@
 
     <!-- VISTA DINÁMICA DE MÓDULO -->
     <div class="content-area" id="contentView">
-      <!-- Carga dinámica mediante JS sin refrescar la página -->
+      <!-- Carga dinámica mediante JS -->
     </div>
   </div>
 
@@ -501,12 +501,13 @@
         { id: 2, item: 'Arroz Koshihikari (kg)', quantity: 25.0, min: 15.0 },
         { id: 3, item: 'Alga Nori (paquete)', quantity: 8.0, min: 5.0 }
       ],
-      recipes: [
-        { name: 'Philadelphia Roll', salmonGrams: 120, riceGrams: 140, noriSheets: 1 },
-        { name: 'California Roll', salmonGrams: 0, riceGrams: 140, noriSheets: 1 }
+      recipes: JSON.parse(localStorage.getItem('seicho_recipes')) || [
+        { id: 1, name: 'Philadelphia Roll', salmonGrams: 120, riceGrams: 140, noriSheets: 1 },
+        { id: 2, name: 'California Roll', salmonGrams: 0, riceGrams: 140, noriSheets: 1 }
       ],
       editingStockId: null,
-      editingExpenseId: null
+      editingExpenseId: null,
+      editingRecipeId: null
     };
 
     /**
@@ -516,6 +517,7 @@
       localStorage.setItem('seicho_sales', JSON.stringify(AppState.sales));
       localStorage.setItem('seicho_expenses', JSON.stringify(AppState.expenses));
       localStorage.setItem('seicho_stock', JSON.stringify(AppState.stock));
+      localStorage.setItem('seicho_recipes', JSON.stringify(AppState.recipes));
       updateMetrics();
     }
 
@@ -629,7 +631,7 @@
       navigate('Ventas - Registro Diario');
     }
 
-    /* MÓDULO DE STOCK Y GASTOS CON CRUD COMPLETO EN AMBOS ENTORNO */
+    /* MÓDULO DE STOCK Y GASTOS */
     function renderStockAndExpensesModule(container) {
       const isEditingStock = AppState.editingStockId !== null;
       const currentStockItem = isEditingStock 
@@ -758,9 +760,7 @@
       `;
     }
 
-    /**
-     * OPERACIONES CRUD DE STOCK
-     */
+    /* CRUD DE STOCK */
     function handleStockSubmit(e) {
       e.preventDefault();
       const name = document.getElementById('stockName').value;
@@ -811,9 +811,7 @@
       }
     }
 
-    /**
-     * OPERACIONES CRUD DE GASTOS / COSTOS
-     */
+    /* CRUD DE GASTOS */
     function handleExpenseSubmit(e) {
       e.preventDefault();
       const desc = document.getElementById('expenseDesc').value;
@@ -821,7 +819,6 @@
       const amount = parseFloat(document.getElementById('expenseAmount').value);
 
       if (AppState.editingExpenseId !== null) {
-        // Modo Edición
         const expense = AppState.expenses.find(e => e.id === AppState.editingExpenseId);
         if (expense) {
           expense.description = desc;
@@ -830,7 +827,6 @@
         }
         AppState.editingExpenseId = null;
       } else {
-        // Modo Creación
         const now = new Date();
         const newExpense = {
           id: Date.now(),
@@ -868,10 +864,45 @@
       }
     }
 
-    /* MÓDULO COSTOS */
+    /* MÓDULO COSTOS Y ESCANDALLOS CON CRUD COMPLETO (EDITAR Y ELIMINAR RECETAS) */
     function renderCostsModule(container) {
+      const isEditingRecipe = AppState.editingRecipeId !== null;
+      const currentRecipe = isEditingRecipe 
+        ? AppState.recipes.find(r => r.id === AppState.editingRecipeId) 
+        : null;
+
       container.innerHTML = `
-        <p style="margin-bottom: 16px; color: var(--text-muted);">Cálculo automático de costo de fabricación por pieza basado en receta e insumos.</p>
+        <h3 style="margin-bottom: 16px; font-size: 1rem; color: var(--text-main);">
+          ${isEditingRecipe ? 'Editar Escandallo de Roll' : 'Agregar Nuevo Roll / Escandallo'}
+        </h3>
+        <form id="recipeForm" onsubmit="handleRecipeSubmit(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Nombre del Roll</label>
+              <input type="text" id="recipeName" value="${currentRecipe ? currentRecipe.name : ''}" placeholder="Ej. Ebi Roll" required>
+            </div>
+            <div class="form-group">
+              <label>Salmón (gramos)</label>
+              <input type="number" id="recipeSalmon" step="1" min="0" value="${currentRecipe ? currentRecipe.salmonGrams : ''}" placeholder="0" required>
+            </div>
+            <div class="form-group">
+              <label>Arroz (gramos)</label>
+              <input type="number" id="recipeRice" step="1" min="0" value="${currentRecipe ? currentRecipe.riceGrams : ''}" placeholder="0" required>
+            </div>
+            <div class="form-group">
+              <label>Alga Nori (láminas)</label>
+              <input type="number" id="recipeNori" step="0.5" min="0" value="${currentRecipe ? currentRecipe.noriSheets : ''}" placeholder="1" required>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button type="submit" class="btn-primary">${isEditingRecipe ? 'Guardar Cambios' : 'Agregar Roll'}</button>
+              ${isEditingRecipe ? `<button type="button" class="btn-secondary" onclick="cancelRecipeEdit()">Cancelar</button>` : ''}
+            </div>
+          </div>
+        </form>
+
+        <div class="section-divider"></div>
+
+        <h3 style="margin-bottom: 16px; font-size: 1rem; color: var(--text-main);">Matriz de Costos de Fabricación y Precios Sugeridos</h3>
         <table class="data-table">
           <thead>
             <tr>
@@ -879,23 +910,88 @@
               <th>Insumos Principales</th>
               <th>Costo Est. Fabricación</th>
               <th>PVP Sugerido (60% Margen)</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            ${AppState.recipes.map(r => {
-              const estimatedCost = (r.salmonGrams * 0.03) + (r.riceGrams * 0.005) + (r.noriSheets * 0.15);
-              const suggestedPVP = estimatedCost / 0.4;
-              return `
-                <tr>
-                  <td><strong>${r.name}</strong></td>
-                  <td>${r.salmonGrams}g Salmón, ${r.riceGrams}g Arroz,${r.noriSheets} Nori</td>
-                  <td>$${estimatedCost.toFixed(2)}</td>                   <td><strong style="color: var(--accent-red);">$${suggestedPVP.toFixed(2)}</strong></td>
-                </tr>
-              `;
-            }).join('')}
+            ${AppState.recipes.length === 0 
+              ? `<tr><td colspan="5" style="color: var(--text-muted);">No hay escandallos registrados.</td></tr>`
+              : AppState.recipes.map(r => {
+                const estimatedCost = (r.salmonGrams * 0.03) + (r.riceGrams * 0.005) + (r.noriSheets * 0.15);
+                const suggestedPVP = estimatedCost / 0.4;
+                return `
+                  <tr>
+                    <td><strong>${r.name}</strong></td>
+                    <td>${r.salmonGrams}g Salmón, ${r.riceGrams}g Arroz,${r.noriSheets} Nori</td>
+                    <td>$${estimatedCost.toFixed(2)}</td>                     <td><strong style="color: var(--accent-red);">$${suggestedPVP.toFixed(2)}</strong></td>
+                    <td>
+                      <button class="btn-action btn-edit" onclick="editRecipeItem(${r.id})">Editar</button>
+                      <button class="btn-action btn-delete" onclick="deleteRecipeItem(${r.id})">Eliminar</button>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
           </tbody>
         </table>
       `;
+    }
+
+    /**
+     * OPERACIONES CRUD DE ESCANDALLOS / RECETAS
+     */
+    function handleRecipeSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('recipeName').value;
+      const salmon = parseFloat(document.getElementById('recipeSalmon').value);
+      const rice = parseFloat(document.getElementById('recipeRice').value);
+      const nori = parseFloat(document.getElementById('recipeNori').value);
+
+      if (AppState.editingRecipeId !== null) {
+        // Modo Edición
+        const recipe = AppState.recipes.find(r => r.id === AppState.editingRecipeId);
+        if (recipe) {
+          recipe.name = name;
+          recipe.salmonGrams = salmon;
+          recipe.riceGrams = rice;
+          recipe.noriSheets = nori;
+        }
+        AppState.editingRecipeId = null;
+      } else {
+        // Modo Creación
+        const newRecipe = {
+          id: Date.now(),
+          name: name,
+          salmonGrams: salmon,
+          riceGrams: rice,
+          noriSheets: nori
+        };
+        AppState.recipes.push(newRecipe);
+      }
+
+      saveState();
+      navigate('Costos - Escandallos de Rolls');
+    }
+
+    function editRecipeItem(id) {
+      AppState.editingRecipeId = id;
+      navigate('Costos - Escandallos de Rolls');
+    }
+
+    function cancelRecipeEdit() {
+      AppState.editingRecipeId = null;
+      navigate('Costos - Escandallos de Rolls');
+    }
+
+    function deleteRecipeItem(id) {
+      const recipe = AppState.recipes.find(r => r.id === id);
+      if (recipe && confirm(`¿Estás seguro de eliminar la receta del "${recipe.name}"?`)) {
+        AppState.recipes = AppState.recipes.filter(r => r.id !== id);
+        if (AppState.editingRecipeId === id) {
+          AppState.editingRecipeId = null;
+        }
+        saveState();
+        navigate('Costos - Escandallos de Rolls');
+      }
     }
 
     /* MÓDULO REPORTES */
@@ -927,7 +1023,7 @@
     /* INICIALIZACIÓN */
     document.addEventListener('DOMContentLoaded', () => {
       updateMetrics();
-      navigate('Gastos - Control de Stock');
+      navigate('Costos - Escandallos de Rolls');
     });
   </script>
 </body>
