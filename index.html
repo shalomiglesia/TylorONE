@@ -248,7 +248,7 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
     }
 
-    /* ESTILOS DE FORMULARIOS Y TABLAS DE MÓDULOS */
+    /* ESTILOS DE FORMULARIOS Y TABLAS */
     .form-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -296,8 +296,57 @@
       align-self: flex-end;
     }
 
+    .btn-secondary {
+      background-color: var(--bg-sidebar);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      align-self: flex-end;
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--hover-bg);
+    }
+
     .btn-primary:hover {
       opacity: 0.9;
+    }
+
+    .btn-action {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+
+    .btn-edit {
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      margin-right: 4px;
+    }
+
+    .btn-edit:hover {
+      background-color: var(--hover-bg);
+    }
+
+    .btn-delete {
+      color: var(--accent-red);
+      border: 1px solid #fecaca;
+      background-color: #fef2f2;
+    }
+
+    .btn-delete:hover {
+      background-color: var(--accent-red);
+      color: #ffffff;
     }
 
     .data-table {
@@ -311,6 +360,7 @@
       padding: 12px;
       text-align: left;
       border-bottom: 1px solid var(--border-color);
+      vertical-align: middle;
     }
 
     .data-table th {
@@ -331,11 +381,16 @@
       color: var(--accent-red);
       border: 1px solid #fecaca;
     }
+
+    .section-divider {
+      margin: 30px 0 20px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
   </style>
 </head>
 <body>
 
-  <!-- BARRA LATERAL MINIMALISTA CON ÍCONOS SVG VECTORIALES -->
+  <!-- BARRA LATERAL MINIMALISTA -->
   <aside class="sidebar">
     <div class="sidebar-header">
       <img src="https://i.postimg.cc/PrDjQXJq/Logotipo-Seisho-Sushi-con-Sol-Japones.png" alt="Seicho Sushi" class="brand-logo">
@@ -410,7 +465,7 @@
 
   <!-- WORKSPACE PRINCIPAL -->
   <div class="main-wrapper">
-    <h2 class="page-title" id="activeSectionTitle">Ventas - Registro Diario</h2>
+    <h2 class="page-title" id="activeSectionTitle">Gastos - Control de Stock</h2>
 
     <!-- MÉTRICAS EN TIEMPO REAL -->
     <div class="metrics-grid">
@@ -436,7 +491,7 @@
 
   <script>
     /**
-     * ESTADO GLOBAL Y PERSISTENCIA (LOCALSTORAGE + CACHE DE ALTA VELOCIDAD)
+     * ESTADO GLOBAL Y PERSISTENCIA DE DATOS
      */
     const AppState = {
       sales: JSON.parse(localStorage.getItem('seicho_sales')) || [],
@@ -449,11 +504,12 @@
       recipes: [
         { name: 'Philadelphia Roll', salmonGrams: 120, riceGrams: 140, noriSheets: 1 },
         { name: 'California Roll', salmonGrams: 0, riceGrams: 140, noriSheets: 1 }
-      ]
+      ],
+      editingStockId: null
     };
 
     /**
-     * Guarda el estado en localStorage de forma ultrarrápida
+     * Guardado de estado centralizado
      */
     function saveState() {
       localStorage.setItem('seicho_sales', JSON.stringify(AppState.sales));
@@ -463,7 +519,7 @@
     }
 
     /**
-     * Recalcula métricas principales al instante
+     * Recalcula métricas principales
      */
     function updateMetrics() {
       const todayStr = new Date().toISOString().split('T')[0];
@@ -487,8 +543,7 @@
     }
 
     /**
-     * RENDERIZADOR DE MÓDULOS
-     * @param {string} sectionName - Nombre del módulo a cargar
+     * NAVEGACIÓN Y RENDERIZADO
      */
     function navigate(sectionName) {
       document.getElementById('activeSectionTitle').innerText = sectionName;
@@ -497,7 +552,7 @@
       if (sectionName.includes('Ventas')) {
         renderSalesModule(view);
       } else if (sectionName.includes('Stock') || sectionName.includes('Gastos')) {
-        renderExpensesModule(view);
+        renderStockAndExpensesModule(view);
       } else if (sectionName.includes('Costos')) {
         renderCostsModule(view);
       } else if (sectionName.includes('Reportes')) {
@@ -505,7 +560,7 @@
       }
     }
 
-    /* MÓDULO 1: REGISTRO DE VENTAS */
+    /* MÓDULO VENTAS */
     function renderSalesModule(container) {
       container.innerHTML = `
         <form id="salesForm" onsubmit="handleSalesSubmit(event)">
@@ -573,14 +628,79 @@
       navigate('Ventas - Registro Diario');
     }
 
-    /* MÓDULO 2: GASTOS Y STOCK CON ALERTAS DE REORDEN */
-    function renderExpensesModule(container) {
+    /* MÓDULO DE STOCK Y GASTOS CON CRUD COMPLETO (EDITAR Y ELIMINAR) */
+    function renderStockAndExpensesModule(container) {
+      const isEditing = AppState.editingStockId !== null;
+      const currentItem = isEditing 
+        ? AppState.stock.find(item => item.id === AppState.editingStockId) 
+        : null;
+
       container.innerHTML = `
+        <h3 style="margin-bottom: 16px; font-size: 1rem; color: var(--text-main);">
+          ${isEditing ? 'Editar Insumo de Stock' : 'Agregar Nuevo Insumo al Stock'}
+        </h3>
+        <form id="stockForm" onsubmit="handleStockSubmit(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Nombre del Insumo / Unidad</label>
+              <input type="text" id="stockName" value="${currentItem ? currentItem.item : ''}" placeholder="Ej. Langostinos (kg)" required>
+            </div>
+            <div class="form-group">
+              <label>Cantidad Actual</label>
+              <input type="number" id="stockQty" step="0.1" min="0" value="${currentItem ? currentItem.quantity : ''}" placeholder="0.0" required>
+            </div>
+            <div class="form-group">
+              <label>Mínimo para Alerta</label>
+              <input type="number" id="stockMin" step="0.1" min="0" value="${currentItem ? currentItem.min : ''}" placeholder="0.0" required>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button type="submit" class="btn-primary">${isEditing ? 'Guardar Cambios' : 'Agregar Insumo'}</button>
+              ${isEditing ? `<button type="button" class="btn-secondary" onclick="cancelStockEdit()">Cancelar</button>` : ''}
+            </div>
+          </div>
+        </form>
+
+        <div class="section-divider"></div>
+
+        <h3 style="margin-bottom: 16px; font-size: 1rem; color: var(--text-main);">Inventario y Alertas de Reorden</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Insumo</th>
+              <th>Cantidad Actual</th>
+              <th>Mínimo Requerido</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${AppState.stock.map(item => `
+              <tr>
+                <td><strong>${item.item}</strong></td>
+                <td>${item.quantity}</td>
+                <td>${item.min}</td>
+                <td>
+                  ${item.quantity <= item.min 
+                    ? `<span class="alert-badge">Reorden Crítico</span>` 
+                    : `<span style="color: var(--success-green); font-weight:600;">Óptimo</span>`}
+                </td>
+                <td>
+                  <button class="btn-action btn-edit" onclick="editStockItem(${item.id})">Editar</button>
+                  <button class="btn-action btn-delete" onclick="deleteStockItem(${item.id})">Eliminar</button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <div class="section-divider"></div>
+
+        <h3 style="margin-bottom: 16px; font-size: 1rem; color: var(--text-main);">Registro de Compras y Gastos</h3>
         <form id="expenseForm" onsubmit="handleExpenseSubmit(event)">
           <div class="form-grid">
             <div class="form-group">
-              <label>Descripción del Insumo / Gasto</label>
-              <input type="text" id="expenseDesc" placeholder="Ej. Compra de Salmón" required>
+              <label>Descripción del Gasto</label>
+              <input type="text" id="expenseDesc" placeholder="Ej. Pago de Alquiler" required>
             </div>
             <div class="form-group">
               <label>Tipo de Costo</label>
@@ -596,33 +716,71 @@
             <button type="submit" class="btn-primary">Registrar Gasto</button>
           </div>
         </form>
-
-        <h3 style="margin-top: 24px; font-size: 1rem; color: var(--text-main);">Estado del Stock de Insumos Críticos</h3>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Insumo</th>
-              <th>Cantidad Actual</th>
-              <th>Mínimo Requerido</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${AppState.stock.map(item => `
-              <tr>
-                <td>${item.item}</td>
-                <td><strong>${item.quantity}</strong></td>
-                <td>${item.min}</td>
-                <td>
-                  ${item.quantity <= item.min 
-                    ? `<span class="alert-badge">Reorden Crítico</span>` 
-                    : `<span style="color: var(--success-green); font-weight:600;">Óptimo</span>`}
-                </td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
       `;
+    }
+
+    /**
+     * AGREGAR O ACTUALIZAR INSUMO EN STOCK
+     */
+    function handleStockSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('stockName').value;
+      const qty = parseFloat(document.getElementById('stockQty').value);
+      const min = parseFloat(document.getElementById('stockMin').value);
+
+      if (AppState.editingStockId !== null) {
+        // Modo Edición
+        const item = AppState.stock.find(i => i.id === AppState.editingStockId);
+        if (item) {
+          item.item = name;
+          item.quantity = qty;
+          item.min = min;
+        }
+        AppState.editingStockId = null;
+      } else {
+        // Modo Creación
+        const newItem = {
+          id: Date.now(),
+          item: name,
+          quantity: qty,
+          min: min
+        };
+        AppState.stock.push(newItem);
+      }
+
+      saveState();
+      navigate('Gastos - Control de Stock');
+    }
+
+    /**
+     * PREPARAR FORMULARIO PARA EDITAR
+     */
+    function editStockItem(id) {
+      AppState.editingStockId = id;
+      navigate('Gastos - Control de Stock');
+    }
+
+    /**
+     * CANCELAR EDICIÓN
+     */
+    function cancelStockEdit() {
+      AppState.editingStockId = null;
+      navigate('Gastos - Control de Stock');
+    }
+
+    /**
+     * ELIMINAR INSUMO DE STOCK
+     */
+    function deleteStockItem(id) {
+      const item = AppState.stock.find(i => i.id === id);
+      if (item && confirm(`¿Estás seguro de eliminar "${item.item}" del control de stock?`)) {
+        AppState.stock = AppState.stock.filter(i => i.id !== id);
+        if (AppState.editingStockId === id) {
+          AppState.editingStockId = null;
+        }
+        saveState();
+        navigate('Gastos - Control de Stock');
+      }
     }
 
     function handleExpenseSubmit(e) {
@@ -640,7 +798,7 @@
       navigate('Gastos - Control de Stock');
     }
 
-    /* MÓDULO 3: ESCANDALLOS Y COSTO POR ROLL */
+    /* MÓDULO COSTOS */
     function renderCostsModule(container) {
       container.innerHTML = `
         <p style="margin-bottom: 16px; color: var(--text-muted);">Cálculo automático de costo de fabricación por pieza basado en receta e insumos.</p>
@@ -670,7 +828,7 @@
       `;
     }
 
-    /* MÓDULO 4: REPORTES Y BALANCE GENERAL */
+    /* MÓDULO REPORTES */
     function renderReportsModule(container) {
       const totalSales = AppState.sales.reduce((sum, s) => sum + Number(s.amount), 0);
       const totalExpenses = AppState.expenses.reduce((sum, e) => sum + Number(e.amount), 0);
@@ -696,10 +854,10 @@
       `;
     }
 
-    /* INICIALIZACIÓN AL CARGAR LA PÁGINA */
+    /* INICIALIZACIÓN */
     document.addEventListener('DOMContentLoaded', () => {
       updateMetrics();
-      navigate('Ventas - Registro Diario');
+      navigate('Gastos - Control de Stock');
     });
   </script>
 </body>
